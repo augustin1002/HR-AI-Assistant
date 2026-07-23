@@ -9,6 +9,81 @@ from agent.router import answer
 
 st.set_page_config(page_title="HR AI Assistant", page_icon="💼", layout="centered")
 
+display_style = os.getenv("DISPLAY_STYLE", "claude").strip().lower()
+if display_style not in {"claude", "chatgpt"}:
+    display_style = "claude"
+
+
+def apply_display_style(style: str) -> None:
+    if style == "chatgpt":
+        st.markdown(
+            """
+            <style>
+            .stApp {
+                background: linear-gradient(180deg, #f7f7f8 0%, #ffffff 100%);
+            }
+            .block-container {
+                padding-top: 1rem;
+            }
+            .stChatMessage {
+                border: 1px solid #e5e7eb;
+                border-radius: 16px;
+                padding: 0.8rem 1rem;
+                margin-bottom: 0.75rem;
+                background: white;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            }
+            [data-testid="stSidebar"] {
+                background: #f8fafc;
+                border-right: 1px solid #e2e8f0;
+            }
+            .stTextInput > div > div > input {
+                border-radius: 999px;
+                padding: 0.8rem 1rem;
+                border: 1px solid #d0d7de;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            """
+            <style>
+            .stApp {
+                background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+                color: #f9fafb;
+            }
+            .block-container {
+                padding-top: 1rem;
+            }
+            .stChatMessage {
+                border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 18px;
+                padding: 0.85rem 1rem;
+                margin-bottom: 0.75rem;
+                background: rgba(17, 24, 39, 0.86);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            }
+            [data-testid="stSidebar"] {
+                background: rgba(17, 24, 39, 0.95);
+                border-right: 1px solid rgba(255,255,255,0.08);
+            }
+            .stTextInput > div > div > input {
+                border-radius: 999px;
+                padding: 0.8rem 1rem;
+                border: 1px solid rgba(255,255,255,0.16);
+                background: rgba(17,24,39,0.7);
+                color: #f9fafb;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+apply_display_style(display_style)
+
 # --- One-time setup: build the SQLite DB if it doesn't exist yet ---
 if not DB_PATH.exists():
     with st.spinner("Setting up employee database..."):
@@ -24,6 +99,7 @@ with st.sidebar:
     st.subheader("Settings")
     provider = os.getenv("LLM_PROVIDER", "mock")
     st.write(f"**LLM provider:** `{provider}`")
+    st.write(f"**Display style:** `{display_style.title()}`")
     if provider == "mock":
         st.warning(
             "Running in MOCK mode - no LLM API key set. Set `LLM_PROVIDER` and the "
