@@ -7,12 +7,18 @@ load_dotenv()
 from database.db import build_database, DB_PATH
 from agent.router import answer
 
-st.set_page_config(page_title="HR AI Assistant", page_icon="💼", layout="centered")
+# --- Page Setup ---
+st.set_page_config(
+    page_title="HR AI Assistant",
+    page_icon="💼",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
 
+# --- Display Style Configuration ---
 display_style = os.getenv("DISPLAY_STYLE", "claude").strip().lower()
 if display_style not in {"claude", "chatgpt"}:
     display_style = "claude"
-
 
 def apply_display_style(style: str) -> None:
     if style == "chatgpt":
@@ -20,108 +26,131 @@ def apply_display_style(style: str) -> None:
             """
             <style>
             .stApp {
-                background: linear-gradient(180deg, #f7f7f8 0%, #ffffff 100%);
+                background: #f9fafb;
+                color: #111827;
             }
             .block-container {
-                padding-top: 1rem;
+                padding-top: 2rem;
+                padding-bottom: 5rem;
+                max-width: 800px;
             }
             .stChatMessage {
-                border: 1px solid #e5e7eb;
-                border-radius: 16px;
-                padding: 0.8rem 1rem;
-                margin-bottom: 0.75rem;
-                background: white;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+                border: 1px solid #eaecf0;
+                border-radius: 12px;
+                padding: 1rem;
+                margin-bottom: 0.8rem;
+                background: #ffffff;
+                box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.05);
             }
             [data-testid="stSidebar"] {
-                background: #f8fafc;
-                border-right: 1px solid #e2e8f0;
+                background-color: #ffffff;
+                border-right: 1px solid #eaecf0;
             }
-            .stTextInput > div > div > input {
-                border-radius: 999px;
-                padding: 0.8rem 1rem;
-                border: 1px solid #d0d7de;
+            /* Fix input field styling and cursor visibility */
+            div[data-baseweb="input"] {
+                border-radius: 24px !important;
+                background-color: #ffffff !important;
+                border: 1px solid #d0d5dd !important;
+            }
+            div[data-baseweb="input"]:focus-within {
+                border-color: #667085 !important;
+                box-shadow: 0 0 0 2px rgba(102, 112, 133, 0.2) !important;
+            }
+            .stChatInput input {
+                color: #101828 !important;
+                caret-color: #101828 !important; /* Visible cursor */
+                font-size: 0.95rem;
             }
             </style>
             """,
             unsafe_allow_html=True,
         )
     else:
+        # Claude style (Dark Mode)
         st.markdown(
             """
             <style>
             .stApp {
-                background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+                background: #111827;
                 color: #f9fafb;
             }
             .block-container {
-                padding-top: 1rem;
+                padding-top: 2rem;
+                padding-bottom: 5rem;
+                max-width: 800px;
             }
             .stChatMessage {
-                border: 1px solid rgba(255,255,255,0.12);
-                border-radius: 18px;
-                padding: 0.85rem 1rem;
-                margin-bottom: 0.75rem;
-                background: rgba(17, 24, 39, 0.86);
-                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                padding: 1rem;
+                margin-bottom: 0.8rem;
+                background: #1f2937;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
             }
             [data-testid="stSidebar"] {
-                background: rgba(17, 24, 39, 0.95);
-                border-right: 1px solid rgba(255,255,255,0.08);
+                background-color: #0f172a;
+                border-right: 1px solid rgba(255, 255, 255, 0.08);
             }
-            .stTextInput > div > div > input {
-                border-radius: 999px;
-                padding: 0.8rem 1rem;
-                border: 1px solid rgba(255,255,255,0.16);
-                background: rgba(17,24,39,0.7);
-                color: #f9fafb;
+            /* Fix input field styling and cursor visibility */
+            div[data-baseweb="input"] {
+                border-radius: 24px !important;
+                background-color: #1f2937 !important;
+                border: 1px solid #374151 !important;
+            }
+            div[data-baseweb="input"]:focus-within {
+                border-color: #60a5fa !important;
+                box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
+            }
+            .stChatInput input {
+                color: #f9fafb !important;
+                caret-color: #60a5fa !important; /* Bright visible cursor */
+                font-size: 0.95rem;
             }
             </style>
             """,
             unsafe_allow_html=True,
         )
 
-
 apply_display_style(display_style)
 
-# --- One-time setup: build the SQLite DB if it doesn't exist yet ---
+# --- Database Setup ---
 if not DB_PATH.exists():
     with st.spinner("Setting up employee database..."):
         build_database()
 
+# --- Header ---
 st.title("💼 HR AI Assistant")
-st.caption(
-    "Ask about company policies (leave, benefits, security, conduct, recruitment) "
-    "or employee data (salary, department, performance, absences)."
-)
+st.caption("Ask about company policies or query employee records securely.")
 
+# --- Sidebar ---
 with st.sidebar:
-    st.subheader("Settings")
+    st.subheader("System Status")
     provider = os.getenv("LLM_PROVIDER", "mock")
-    st.write(f"**LLM provider:** `{provider}`")
-    st.write(f"**Display style:** `{display_style.title()}`")
-    if provider == "mock":
-        st.warning(
-            "Running in MOCK mode - no LLM API key set. Set `LLM_PROVIDER` and the "
-            "matching API key in `.env` for real answers. RAG retrieval and SQL "
-            "queries still work in mock mode; only the final write-up is canned."
-        )
-    st.subheader("Example questions")
+    st.write(f"**LLM Provider:** `{provider.upper()}`")
+    st.write(f"**Theme:** `{display_style.title()}`")
+    
+    st.divider()
+    
+    st.subheader("Suggested Queries")
     st.markdown(
-        "- What is the maternity leave policy?\n"
-        "- Who has the highest salary?\n"
-        "- How many employees are in IT/IS?\n"
-        "- Explain the dress code.\n"
-        "- What is the password policy?\n"
-        "- Show employees with low performance scores.\n"
-        "- Who reports to Michael Albert, and what is the probation policy?"
+        """
+        * What is the maternity leave policy?
+        * Who has the highest salary?
+        * How many employees are in IT/IS?
+        * Explain the dress code.
+        * What is the password policy?
+        """
     )
-    if st.button("🔄 Rebuild document index"):
+    
+    st.divider()
+    
+    if st.button("🔄 Rebuild Document Index", use_container_width=True):
         from rag.retriever import get_retriever
         st.cache_resource.clear()
         get_retriever().build_index()
-        st.success("Index rebuilt.")
+        st.success("Index rebuilt successfully.")
 
+# --- Chat Messages ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -129,10 +158,12 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         if msg["role"] == "assistant" and msg.get("route"):
-            st.caption(f"routed via: {msg['route']}")
+            st.caption(f"*routed via: {msg['route']}*")
 
+# --- User Input & Logic ---
 if prompt := st.chat_input("Ask about HR policy or employee data..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
+    
     with st.chat_message("user"):
         st.markdown(prompt)
 
@@ -143,16 +174,22 @@ if prompt := st.chat_input("Ask about HR policy or employee data..."):
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             result = answer(prompt, chat_history=history)
-        st.markdown(result["answer"])
-        st.caption(f"routed via: {result['route']}")
-        with st.expander("Show retrieved context"):
-            if result.get("rag_context"):
-                st.markdown("**Policy excerpts:**")
-                st.text(result["rag_context"])
-            if result.get("sql_context"):
-                st.markdown("**Database results:**")
-                st.text(result["sql_context"])
+            st.markdown(result["answer"])
+            st.caption(f"*routed via: {result['route']}*")
 
-    st.session_state.messages.append({
-        "role": "assistant", "content": result["answer"], "route": result["route"],
-    })
+            if result.get("rag_context") or result.get("sql_context"):
+                with st.expander("Show retrieved context"):
+                    if result.get("rag_context"):
+                        st.markdown("**Policy Excerpts:**")
+                        st.text(result["rag_context"])
+                    if result.get("sql_context"):
+                        st.markdown("**Database Results:**")
+                        st.text(result["sql_context"])
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": result["answer"],
+            "route": result["route"],
+        }
+    )
