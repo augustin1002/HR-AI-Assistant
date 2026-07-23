@@ -1,0 +1,42 @@
+ABC Technologies Pvt. Ltd.
+IT Security Policy
+Version 1.0
+
+Purpose
+This policy defines the minimum information security requirements to protect company data, systems, and technology assets.
+
+Scope
+Applies to all employees, contractors, interns, consultants, and third parties who access company IT resources.
+
+Password Policy
+Passwords must be at least 12 characters long, unique, and changed immediately if compromise is suspected. Password sharing is prohibited.
+
+Multi-Factor Authentication (MFA)
+MFA is mandatory for company email, VPN access, cloud services, and other critical business applications.
+
+Acceptable Use
+Company devices and networks are primarily for business purposes. Users must not install unauthorized software or access malicious websites.
+
+Email & Phishing Security
+Employees must verify suspicious emails, avoid clicking unknown links, and immediately report phishing attempts to the IT Security team.
+
+Data Classification
+Information is classified as Public, Internal, Confidential, or Restricted. Sensitive information must be stored and transmitted securely.
+
+Device Security
+All company laptops and mobile devices must use full-disk encryption, antivirus protection, and automatic screen locking.
+
+Remote Work Security
+Employees working remotely must use the company VPN, secure Wi-Fi, and approved collaboration tools.
+
+USB & Removable Media
+Use of personal USB drives is prohibited unless specifically approved by the IT department.
+
+Incident Reporting
+Security incidents, lost devices, suspected malware, or unauthorized access must be reported to IT immediately.
+
+Disciplinary Action
+Violations of this policy may result in disciplinary action, including termination of employment and legal action where applicable.
+
+Revision History
+Version 1.0 - Initial Release (July 2026).
